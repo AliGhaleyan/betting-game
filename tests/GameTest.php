@@ -1,19 +1,19 @@
 <?php
 
-
 use App\Dice;
 use App\GameTable;
 use App\Player;
+use App\Actor;
 use PHPUnit\Framework\TestCase;
 
 class GameTest extends TestCase
 {
     public function test_win()
     {
-        $sut = new GameTable(new Player([1, 2], 100), $this->getDiceMock(1));
+        $sut = new Actor(new Player([1, 2], 100), $this->getDiceMock(1));
         $sut->play();
         $this->assertTrue($sut->isWin());
-        $this->assertEquals($sut->getAward(), 100);
+        $this->assertEquals($sut->getAward(), 200);
     }
 
     protected function getDiceMock(int $willReturn): Dice
@@ -23,19 +23,11 @@ class GameTest extends TestCase
         return $diceMock;
     }
 
-    public function test_lesser_lose()
+    public function test_lose()
     {
-        $sut = new GameTable(new Player([1, 2], 100), $this->getDiceMock(3));
+        $sut = new Actor(new Player([1, 2], 100), $this->getDiceMock(3));
         $sut->play();
         $this->assertFalse($sut->isWin());
-        $this->assertEquals($sut->getAward(), -50);
-    }
-
-    public function test_more_lose()
-    {
-        $sut = new GameTable(new Player([1, 2, 3, 4], 100), $this->getDiceMock(5));
-        $sut->play();
-        $this->assertFalse($sut->isWin());
-        $this->assertEquals($sut->getAward(), -200);
+        $this->assertEquals($sut->getAward(), 0);
     }
 }

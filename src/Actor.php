@@ -1,14 +1,11 @@
 <?php
 
-
 namespace App;
 
-
-class GameTable
-{
-    protected Player $player;
-    protected Dice $dice;
-    protected bool $win = false;
+class Actor {
+    private Player $player;
+    private Dice $dice;
+    private bool $win = false;
 
     public function __construct(Player $player, Dice $dice)
     {
@@ -26,16 +23,15 @@ class GameTable
 
     public function getAward()
     {
+        if (!$this->isWin()) return 0;
+
         $betNumbers = $this->player->getBetNumbers();
         [$gameRate, $playerRate] = $this->getRatio(6 - count($betNumbers), count($betNumbers));
 
-        if ($this->isWin())
-            return $this->player->getBetValue();
-
         if ($gameRate > $playerRate)
-            return -($this->player->getBetValue() / $gameRate);
+            return $this->player->getBetValue() * $gameRate;
 
-        return -($this->player->getBetValue() * $playerRate);
+        return $this->player->getBetValue() / $gameRate;
     }
 
     protected function getRatio($num1, $num2): array
