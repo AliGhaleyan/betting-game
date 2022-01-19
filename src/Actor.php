@@ -5,12 +5,14 @@ namespace App;
 class Actor {
     private Player $player;
     private Dice $dice;
+    private Calculator $calculator;
     private bool $win = false;
 
     public function __construct(Player $player, Dice $dice)
     {
         $this->player = $player;
         $this->dice = $dice;
+        $this->calculator = new Calculator();
     }
 
     public function play()
@@ -26,23 +28,9 @@ class Actor {
         if (!$this->isWin()) return 0;
 
         $betNumbers = $this->player->getBetNumbers();
-        [$gameRate, $playerRate] = $this->getRatio(6 - count($betNumbers), count($betNumbers));
+        [$gameRate, $playerRate] = $this->calculator->getRatio($betNumbers);
 
-        if ($gameRate > $playerRate)
-            return $this->player->getBetValue() * $gameRate;
-
-        return $this->player->getBetValue() / $gameRate;
-    }
-
-    protected function getRatio($num1, $num2): array
-    {
-        for ($i = $num2; $i > 1; $i--) {
-            if (($num1 % $i) == 0 && ($num2 % $i) == 0) {
-                $num1 = $num1 / $i;
-                $num2 = $num2 / $i;
-            }
-        }
-        return [$num1, $num2];
+        return $this->calculator->getAward($gameRate, $playerRate, $this->player->getBetValue());
     }
 
     public function isWin(): bool
