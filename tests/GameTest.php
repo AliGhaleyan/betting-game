@@ -1,14 +1,46 @@
 <?php
 
-use App\Dice;
-use App\GameTable;
-use App\Player;
 use App\Actor;
-use PHPUnit\Framework\TestCase;
 use App\Calculator;
+use App\Dice;
+use App\Player;
+use PHPUnit\Framework\TestCase;
 
 class GameTest extends TestCase
 {
+    private Calculator $calculator;
+
+    public function test_ratio()
+    {
+        $this->assertRatio([5, 1], [1]);
+        $this->assertRatio([2, 1], [1, 2]);
+        $this->assertRatio([1, 1], [1, 2, 3]);
+        $this->assertRatio([1, 2], [1, 2, 3, 4]);
+        $this->assertRatio([1, 5], [1, 2, 3, 4, 5]);
+    }
+
+    protected function assertRatio($rate, $bet)
+    {
+        $this->assertEquals($rate, $this->calculator->getRatio($bet));
+    }
+
+    public function test_award()
+    {
+        $this->assertAward([
+            [5, 1, 500],
+            [2, 1, 200],
+            [1, 1, 100],
+            [1, 2, 50],
+            [1, 5, 20],
+        ], 100);
+    }
+
+    public function assertAward($values, $bet)
+    {
+        foreach ($values as [$gameRate, $playerRate, $award])
+            $this->assertEquals($this->calculator->getAward($gameRate, $playerRate, $bet), $award);
+    }
+
     public function test_win()
     {
         $sut = new Actor(new Player([1, 2], 100), $this->getDiceMock(1));
@@ -32,44 +64,9 @@ class GameTest extends TestCase
         $this->assertEquals($sut->getAward(), 0);
     }
 
-    public function test_ratio()
+    protected function setUp(): void
     {
-        $this->assertRatio(
-            [[5, 1], [1]],
-            [[2, 1], [1, 2]],
-            [[1, 1], [1, 2, 3]],
-            [[1, 2], [1, 2, 3, 4]],
-            [[1, 5], [1, 2, 3, 4, 5]]
-        );
-    }
-
-    protected function assertRatio(...$numbers)
-    {
-        $calculator = new Calculator();
-
-        foreach ($numbers as [$rate, $bet]) {
-            $this->assertEquals($rate, $calculator->getRatio($bet));
-        }
-    }
-
-    public function test_award()
-    {
-        $this->assertAward(
-            [5, 1, 500],
-            [2, 1, 200],
-            [1, 1, 100],
-            [1, 2, 50],
-            [1, 5, 20],
-        );
-    }
-
-    public function assertAward(...$values)
-    {
-        $calculator = new Calculator();
-        $value = 100;
-
-        foreach ($values as [$gameRate, $playerRate, $award]) {
-            $this->assertEquals($calculator->getAward($gameRate, $playerRate, $value), $award);
-        }
+        parent::setUp();
+        $this->calculator = new Calculator();
     }
 }
